@@ -1,0 +1,25 @@
+{
+  "@@locale": "en",
+  "appTitle": "Noteker",
+  "notes": "Notes",
+  "noNotesYet": "No notes yet. Tap + to create one!",
+  "selectNotePrompt": "Select a note from the left to edit it, or tap + to create one.",
+  "showDemo": "Show Demo",
+  "showWalkthrough": "Show Walkthrough",
+  "quickTour": "Quick tour",
+  "welcomeTitle": "Welcome to Noteker!",
+  "welcomeBody": "A minimal local-first note app with optional Drive sync and LaTeX support.",
+  "createEditTitle": "Create & Edit",
+  "createEditBody": "Tap + to create a note. Edit inline on wide screens, or open the full editor on mobile.",
+  "mathPreviewTitle": "Math & Preview",
+  "mathPreviewBody": "Toggle math rendering using the ƒ button. Single newlines are preserved in the preview.",
+  "driveSyncTitle": "Drive Sync",
+  "driveSyncBody": "Connect to Google Drive to backup and sync your notes across devices.",
+  "showDemoButton": "Show Demo",
+  "next": "Next",
+  "back": "Back",
+  "close": "Close",
+
+  "demoTitle": "Welcome to Noteker — Math demo",
+  "demoContent": "Welcome to Noteker!\n\nThis demo shows inline math: $x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}\n\nAnd a block equation:\n$$\n\\nabla \\cdot \\mathbf{E} = \\frac{\\rho}{\\varepsilon_0}\n$$\n\nSingle newlines are preserved — press Enter to create a new line and it will show up in the preview.\n\nEnjoy!"
+}

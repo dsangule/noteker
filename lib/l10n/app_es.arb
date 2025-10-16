@@ -1,0 +1,25 @@
+{
+  "@@locale": "es",
+  "appTitle": "Noteker",
+  "notes": "Notas",
+  "noNotesYet": "Aún no hay notas. ¡Pulsa + para crear una!",
+  "selectNotePrompt": "Selecciona una nota a la izquierda para editarla, o pulsa + para crear una.",
+  "showDemo": "Mostrar demo",
+  "showWalkthrough": "Mostrar recorrido",
+  "quickTour": "Recorrido rápido",
+  "welcomeTitle": "¡Bienvenido a Noteker!",
+  "welcomeBody": "Una aplicación mínima de notas local-primera con sincronización opcional en Drive y soporte LaTeX.",
+  "createEditTitle": "Crear y editar",
+  "createEditBody": "Pulsa + para crear una nota. Edita en línea en pantallas grandes o abre el editor completo en móvil.",
+  "mathPreviewTitle": "Matemáticas y vista previa",
+  "mathPreviewBody": "Activa el render de matemáticas con el botón ƒ. Los saltos de línea simples se conservan en la vista previa.",
+  "driveSyncTitle": "Sincronización con Drive",
+  "driveSyncBody": "Conéctate a Google Drive para respaldar y sincronizar tus notas entre dispositivos.",
+  "showDemoButton": "Mostrar demo",
+  "next": "Siguiente",
+  "back": "Atrás",
+  "close": "Cerrar",
+
+  "demoTitle": "Bienvenido a Noteker — Demo de matemáticas",
+  "demoContent": "¡Bienvenido a Noteker!\n\nEsta demo muestra matemáticas en línea: $x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}\n\nY una ecuación en bloque:\n$$\n\\nabla \\cdot \\mathbf{E} = \\frac{\\rho}{\\varepsilon_0}\n$$\n\nLos saltos de línea simples se conservan — pulsa Enter para crear una nueva línea y se mostrará en la vista previa.\n\n¡Disfruta!"
+}
