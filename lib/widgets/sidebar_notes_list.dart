@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:noteker/models/note.dart';
-import 'package:noteker/widgets/sync_icon.dart';
+
+import '../models/note.dart';
+import 'sync_icon.dart';
 
 class SidebarNotesList extends StatelessWidget {
-  final List<Note> notes;
-  final String? selectedId;
-  final void Function(Note) onSelect;
-  final void Function(String noteId) onDelete;
-  final void Function(String noteId) onShowSync;
-  final Map<String, dynamic> syncStatus; // expects SyncStatus values
-
   const SidebarNotesList({
     required this.notes,
     required this.selectedId,
@@ -20,6 +14,13 @@ class SidebarNotesList extends StatelessWidget {
     required this.syncStatus,
     super.key,
   });
+
+  final List<Note> notes;
+  final String? selectedId;
+  final void Function(Note) onSelect;
+  final void Function(String noteId) onDelete;
+  final void Function(String noteId) onShowSync;
+  final Map<String, SyncStatus> syncStatus;
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +52,6 @@ class SidebarNotesList extends StatelessWidget {
           onTap: () => onSelect(note),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
                 width: 28,

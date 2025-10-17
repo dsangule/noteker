@@ -4,15 +4,20 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:flutter/material.dart';
-import 'package:noteker/models/note.dart';
-import 'package:noteker/services/drive_service.dart';
-import 'package:noteker/services/note_repository.dart';
-import 'package:noteker/utils/markdown_helpers.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:noteker/l10n/app_localizations.dart';
+
+import '../l10n/app_localizations.dart';
+import '../models/note.dart';
+import '../services/drive_service.dart';
+import '../services/note_repository.dart';
+import '../utils/markdown_helpers.dart';
 
 class NotesProvider extends ChangeNotifier {
+  NotesProvider() {
+    _init();
+  }
+
   final NoteRepository _noteRepo = SharedPrefsNoteRepository();
   final DriveService driveService = DriveService();
 
@@ -63,7 +68,9 @@ class NotesProvider extends ChangeNotifier {
   List<Note> get filteredAndSortedNotes {
     final q = _searchQuery.trim().toLowerCase();
     final filtered = _notes.where((n) {
-      if (q.isEmpty) return true;
+      if (q.isEmpty) {
+        return true;
+      }
       return n.title.toLowerCase().contains(q) ||
           n.content.toLowerCase().contains(q);
     }).toList();
@@ -76,18 +83,15 @@ class NotesProvider extends ChangeNotifier {
     return filtered;
   }
 
-  NotesProvider() {
-    _init();
-  }
-
   Future<void> _init() async {
     await _loadLocalDriveMap();
     await _ensureWebClientIdProvided();
 
     final loadedNotes = await _noteRepo.loadNotes();
-    _notes.clear();
-    _notes.addAll(loadedNotes);
-    _notes.sort((a, b) => b.date.compareTo(a.date));
+    _notes
+      ..clear()
+      ..addAll(loadedNotes)
+      ..sort((a, b) => b.date.compareTo(a.date));
 
     final prefs = await SharedPreferences.getInstance();
     _mathEnabled = prefs.getBool(kPrefKeyMathEnabled) ?? true;
@@ -102,7 +106,7 @@ class NotesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setSortBy(bool byDate) {
+  void setSortBy({required bool byDate}) {
     _sortByDateDesc = byDate;
     notifyListeners();
   }
@@ -147,7 +151,7 @@ class NotesProvider extends ChangeNotifier {
     _notes.sort((a, b) => b.date.compareTo(a.date));
     notifyListeners();
 
-    unawaited(_noteRepo.saveNotes(_notes));
+    _unawaited(_noteRepo.saveNotes(_notes));
 
     // Mark note as dirty and schedule for upload after inactivity.
     _dirtyNotes.add(note.id);
@@ -166,7 +170,7 @@ class NotesProvider extends ChangeNotifier {
         await driveService.deleteFile(driveId);
         _localToDriveId.remove(id);
         await _saveLocalDriveMap();
-      } catch (e) {
+      } on Exception catch (e) {
         debugPrint('[Drive] delete error: $e');
         _syncStatus[id] = SyncStatus.error;
         notifyListeners();
@@ -180,7 +184,7 @@ class NotesProvider extends ChangeNotifier {
       _selectedNoteId = null;
     }
     notifyListeners();
-    unawaited(_noteRepo.saveNotes(_notes));
+    _unawaited(_noteRepo.saveNotes(_notes));
   }
 
   Future<void> setDriveFolder(String folderId) async {
@@ -207,7 +211,9 @@ class NotesProvider extends ChangeNotifier {
   // Drive sync logic
 
   Future<void> uploadNote(Note note) async {
-    if (!driveService.isSignedIn || _driveFolderId == null) return;
+    if (!driveService.isSignedIn || _driveFolderId == null) {
+      return;
+    }
     if (_uploadsInFlight.contains(note.id)) {
       _dirtyNotes.add(note.id);
       return;
@@ -218,7 +224,7 @@ class NotesProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      var driveId = _localToDriveId[note.id];
+      final driveId = _localToDriveId[note.id];
   String normalize(String s) => s.replaceAll('\r\n', '\n').trim();
   final localNormalized = normalize(note.content);
       if (driveId != null) {
@@ -236,7 +242,7 @@ class NotesProvider extends ChangeNotifier {
         final files = await driveService.listMarkdownFiles(_driveFolderId!);
         final match = files.firstWhere(
           (f) => (f.name ?? '').replaceAll('.md', '') == note.title,
-          orElse: () => drive.File(), // Dummy file with no ID
+          orElse: drive.File.new, // Dummy file with no ID
         );
 
         if (match.id != null) {
@@ -258,7 +264,7 @@ class NotesProvider extends ChangeNotifier {
 
       _dirtyNotes.remove(note.id);
       _inactivityTimers[note.id]?.cancel();
-    } catch (e) {
+    } on Exception catch (e) {
       _syncStatus[note.id] = SyncStatus.error;
       _syncLogs.putIfAbsent(note.id, () => []).add('Upload error: $e');
       debugPrint('[Drive] upload error: $e');
@@ -266,7 +272,7 @@ class NotesProvider extends ChangeNotifier {
       _uploadsInFlight.remove(note.id);
       notifyListeners();
       if (_dirtyNotes.contains(note.id)) {
-        Future.microtask(() => uploadNote(note));
+        _unawaited(Future.microtask(() => uploadNote(note)));
       }
     }
   }
@@ -282,7 +288,9 @@ class NotesProvider extends ChangeNotifier {
   }
 
   Future<void> syncFromDrive() async {
-    if (!driveService.isSignedIn || _driveFolderId == null) return;
+    if (!driveService.isSignedIn || _driveFolderId == null) {
+      return;
+    }
     try {
       final files = await driveService.listMarkdownFiles(_driveFolderId!);
       for (final f in files) {
@@ -308,7 +316,7 @@ class NotesProvider extends ChangeNotifier {
           final note = existing.first;
           // Only update local note if content or timestamp differ.
           final localContent = note.content;
-          final normalize = (String s) => s.replaceAll('\r\n', '\n').trim();
+          String normalize(String s) => s.replaceAll('\r\n', '\n').trim();
           if (normalize(localContent) != normalize(content) || note.date.isBefore(f.modifiedTime ?? note.date)) {
             final updated = Note(
               id: note.id,
@@ -326,7 +334,7 @@ class NotesProvider extends ChangeNotifier {
         }
       }
       notifyListeners();
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('[Drive Sync] error: $e');
     }
   }
@@ -338,13 +346,15 @@ class NotesProvider extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final jsonStr = prefs.getString(_kLocalDriveMapKey);
       if (jsonStr != null && jsonStr.isNotEmpty) {
-        final Map<String, dynamic> decoded = json.decode(jsonStr);
+        final decoded = json.decode(jsonStr) as Map<String, dynamic>;
         _localToDriveId.clear();
         decoded.forEach((k, v) {
-          if (v is String) _localToDriveId[k] = v;
+          if (v is String) {
+            _localToDriveId[k] = v;
+          }
         });
       }
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('[DriveMap] could not load local->drive map: $e');
     }
   }
@@ -353,13 +363,15 @@ class NotesProvider extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_kLocalDriveMapKey, json.encode(_localToDriveId));
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('[DriveMap] could not save local->drive map: $e');
     }
   }
 
   Future<void> _ensureWebClientIdProvided() async {
-    if (!kIsWeb) return;
+    if (!kIsWeb) {
+      return;
+    }
     const clientId = '611993003321-66s7r0342ljmshg3eup589u5pnqabe76.apps.googleusercontent.com';
     try {
       final existing = await driveService.getWebClientId();
@@ -367,19 +379,23 @@ class NotesProvider extends ChangeNotifier {
         await driveService.setWebClientId(clientId);
         debugPrint('[Drive] web client id set from code');
       }
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('[Drive] could not set web client id: $e');
     }
   }
 
   void _startPeriodicSyncLoop() {
-    if (_periodicSyncLoopActive) return;
+    if (_periodicSyncLoopActive) {
+      return;
+    }
     _periodicSyncLoopActive = true;
     () async {
       while (_periodicSyncLoopActive) {
-        await Future.delayed(const Duration(seconds: 60));
-        if (!_periodicSyncLoopActive) break;
-        unawaited(syncFromDrive());
+        await Future<void>.delayed(const Duration(seconds: 60));
+        if (!_periodicSyncLoopActive) {
+          break;
+        }
+        _unawaited(syncFromDrive());
       }
     }();
   }
@@ -392,7 +408,7 @@ class NotesProvider extends ChangeNotifier {
   void dispose() {
     _periodicSyncTimer?.cancel();
     _stopPeriodicSyncLoop();
-    for (var timer in _inactivityTimers.values) {
+    for (final timer in _inactivityTimers.values) {
       timer.cancel();
     }
     super.dispose();
@@ -400,10 +416,10 @@ class NotesProvider extends ChangeNotifier {
 
   // Demo and Walkthrough logic
   Future<void> ensureDemoNote(BuildContext context) async {
+    final loc = AppLocalizations.of(context);
     final prefs = await SharedPreferences.getInstance();
     final demoSeen = prefs.getBool('demo_shown_v1') ?? false;
     if (!demoSeen) {
-      final loc = AppLocalizations.of(context);
       final demo = Note(
         id: 'demo-1',
         title: loc.demoTitle,
@@ -430,7 +446,9 @@ class NotesProvider extends ChangeNotifier {
 
   // Import a note from Drive, creating a new local note and mapping it.
   Future<void> importNoteFromDrive(drive.File file) async {
-    if (!driveService.isSignedIn) return;
+    if (!driveService.isSignedIn) {
+      return;
+    }
 
     final content = await driveService.downloadFileContent(file.id!);
     final title = (file.name ?? 'Untitled').replaceAll('.md', '');
@@ -447,4 +465,8 @@ class NotesProvider extends ChangeNotifier {
     _updateSyncState(newNote.id, file.id, 'Imported');
     selectNote(newNote.id);
   }
+
+  // Simple fire-and-forget helper; keeps code explicit without depending on
+  // SDK-side `unawaited` helper exports which vary across SDK versions.
+  void _unawaited(Future<void> f) {}
 }

@@ -1,15 +1,16 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:noteker/models/note.dart';
 import 'package:provider/provider.dart';
-import 'package:noteker/providers/gamification_provider.dart';
+
+import '../models/note.dart';
+import '../providers/gamification_provider.dart';
 
 class NoteEditor extends StatefulWidget {
-  final Note? note;
-  final void Function(Note) onChanged; // autosave callback
+  const NoteEditor({required this.onChanged, this.note, super.key});
 
-  const NoteEditor({this.note, required this.onChanged, super.key});
+  final void Function(Note) onChanged; // autosave callback
+  final Note? note;
 
   @override
   State<NoteEditor> createState() => _NoteEditorState();
@@ -77,56 +78,52 @@ class _NoteEditorState extends State<NoteEditor> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
-      child: Column(
-        children: [
-          TextField(
-            controller: _titleController,
-            autofocus: widget.note == null,
-            style: Theme.of(context).textTheme.headlineMedium,
-            maxLines: null,
-            decoration: const InputDecoration(
-              hintText: 'Title',
-              border: InputBorder.none,
-            ),
+  Widget build(BuildContext context) => SingleChildScrollView(
+    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+    child: Column(
+      children: [
+        TextField(
+          controller: _titleController,
+          autofocus: widget.note == null,
+          style: Theme.of(context).textTheme.headlineMedium,
+          maxLines: null,
+          decoration: const InputDecoration(
+            hintText: 'Title',
+            border: InputBorder.none,
           ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _contentController,
-            style: Theme.of(context).textTheme.bodyMedium,
-            decoration: const InputDecoration(
-              hintText: 'Start writing...',
-              border: InputBorder.none,
-            ),
-            maxLines: null,
-            keyboardType: TextInputType.multiline,
+        ),
+        const SizedBox(height: 16),
+        TextField(
+          controller: _contentController,
+          style: Theme.of(context).textTheme.bodyMedium,
+          decoration: const InputDecoration(
+            hintText: 'Start writing...',
+            border: InputBorder.none,
           ),
-        ],
-      ),
-    );
-  }
+          maxLines: null,
+          keyboardType: TextInputType.multiline,
+        ),
+      ],
+    ),
+  );
 }
 
 class NoteEditorScreen extends StatelessWidget {
-  final Note? note;
-  final void Function(Note) onChanged;
+  const NoteEditorScreen({required this.onChanged, this.note, super.key});
 
-  const NoteEditorScreen({this.note, required this.onChanged, super.key});
+  final void Function(Note) onChanged;
+  final Note? note;
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(
+      elevation: 0,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () => Navigator.of(context).pop(),
       ),
-      body: NoteEditor(note: note, onChanged: onChanged),
-    );
-  }
+    ),
+    body: NoteEditor(note: note, onChanged: onChanged),
+  );
 }

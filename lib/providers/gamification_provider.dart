@@ -15,7 +15,7 @@ class GamificationProvider extends ChangeNotifier {
 
   int get xp => _xp;
   int get level => 1 + (_xp ~/ 1000);
-  int get nextLevelXp => (level * 1000);
+  int get nextLevelXp => level * 1000;
   double get progressToNext => (_xp - ((level - 1) * 1000)) / 1000.0;
   int get streak => _streak;
   Set<String> get unlocked => _unlocked;
@@ -53,7 +53,9 @@ class GamificationProvider extends ChangeNotifier {
     _xp = prefs.getInt(_kXpKey) ?? 0;
     _streak = prefs.getInt(_kStreakKey) ?? 0;
     final last = prefs.getString(_kLastActiveKey);
-    if (last != null) _lastActive = DateTime.tryParse(last);
+    if (last != null) {
+      _lastActive = DateTime.tryParse(last);
+    }
     final list = prefs.getStringList(_kUnlockedKey) ?? <String>[];
     _unlocked
       ..clear()
@@ -81,7 +83,9 @@ class GamificationProvider extends ChangeNotifier {
     final last = DateTime(_lastActive!.year, _lastActive!.month, _lastActive!.day);
     final today = DateTime(now.year, now.month, now.day);
     final diffDays = today.difference(last).inDays;
-    if (diffDays == 0) return; // already counted today
+    if (diffDays == 0) {
+      return; // already counted today
+    }
     if (diffDays == 1) {
       _streak += 1;
     } else if (diffDays > 1) {
@@ -100,7 +104,9 @@ class GamificationProvider extends ChangeNotifier {
 
   void _evaluateAchievements() {
     for (final a in allAchievements) {
-      if (_unlocked.contains(a.id)) continue;
+      if (_unlocked.contains(a.id)) {
+        continue;
+      }
       if (a.predicate.isSatisfied(xp: _xp, streak: _streak)) {
         _unlocked.add(a.id);
         _recentUnlocks.add(a.id);
@@ -109,31 +115,39 @@ class GamificationProvider extends ChangeNotifier {
   }
 
   Achievement? takeNextUnlock() {
-    if (_recentUnlocks.isEmpty) return null;
+    if (_recentUnlocks.isEmpty) {
+      return null;
+    }
     final id = _recentUnlocks.removeAt(0);
     return allAchievements.firstWhere((a) => a.id == id, orElse: () => Achievement(id: id, title: 'Achievement', description: '', predicate: AchievementPredicate.xpAtLeast(0)));
   }
 }
 
 class Achievement {
+  const Achievement({required this.id, required this.title, required this.description, required this.predicate});
+  
   final String id;
   final String title;
   final String description;
   final AchievementPredicate predicate;
-  const Achievement({required this.id, required this.title, required this.description, required this.predicate});
 }
 
 class AchievementPredicate {
-  final int? xpAtLeastValue;
-  final int? streakAtLeastValue;
   const AchievementPredicate._({this.xpAtLeastValue, this.streakAtLeastValue});
 
   factory AchievementPredicate.xpAtLeast(int v) => AchievementPredicate._(xpAtLeastValue: v);
   factory AchievementPredicate.streakAtLeast(int v) => AchievementPredicate._(streakAtLeastValue: v);
+  
+  final int? xpAtLeastValue;
+  final int? streakAtLeastValue;
 
   bool isSatisfied({required int xp, required int streak}) {
-    if (xpAtLeastValue != null && xp < xpAtLeastValue!) return false;
-    if (streakAtLeastValue != null && streak < streakAtLeastValue!) return false;
+    if (xpAtLeastValue != null && xp < xpAtLeastValue!) {
+      return false;
+    }
+    if (streakAtLeastValue != null && streak < streakAtLeastValue!) {
+      return false;
+    }
     return true;
   }
 }

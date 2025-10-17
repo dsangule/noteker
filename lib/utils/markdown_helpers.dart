@@ -5,7 +5,9 @@ import 'dart:core';
 // unit test.
 
 String preserveLineBreaks(String text) {
-  if (text.isEmpty) return text;
+  if (text.isEmpty) {
+    return text;
+  }
   final lines = text.split('\n');
   final buf = StringBuffer();
   var inFenced = false;
@@ -31,7 +33,9 @@ String preserveLineBreaks(String text) {
 }
 
 String processMath(String text) {
-  if (text.isEmpty) return text;
+  if (text.isEmpty) {
+    return text;
+  }
   final lines = text.split('\n');
   final out = StringBuffer();
   var inFenced = false;
@@ -54,25 +58,35 @@ String processMath(String text) {
         final before = line.substring(0, first);
         final math = line.substring(first + 2, last);
         final after = line.substring(last + 2);
-        if (before.isNotEmpty) out.write(before);
-        out.write('<mathblock>$math</mathblock>');
-        if (after.isNotEmpty) out.write(after);
-        out.writeln();
+        if (before.isNotEmpty) {
+          out.write(before);
+        }
+        out
+          ..write('<mathblock>$math</mathblock>')
+          ..writeln();
+        if (after.isNotEmpty) {
+          out.write(after);
+        }
         continue;
       }
       final startIdx = line.indexOf(r'$$');
       final before = line.substring(0, startIdx);
       final buffer = StringBuffer();
       var found = false;
-      var rest = line.substring(startIdx + 2);
+      final rest = line.substring(startIdx + 2);
       if (rest.contains(r'$$')) {
         final end = rest.indexOf(r'$$');
         buffer.writeln(rest.substring(0, end));
         final after = rest.substring(end + 2);
-        if (before.isNotEmpty) out.write(before);
-        out.write('<mathblock>${buffer.toString()}</mathblock>');
-        if (after.isNotEmpty) out.write(after);
-        out.writeln();
+        if (before.isNotEmpty) {
+          out.write(before);
+        }
+        out
+          ..write('<mathblock>${buffer.toString()}</mathblock>')
+          ..writeln();
+        if (after.isNotEmpty) {
+          out.write(after);
+        }
         continue;
       }
       buffer.writeln(rest);
@@ -83,10 +97,15 @@ String processMath(String text) {
           final idx = l.indexOf(r'$$');
           buffer.writeln(l.substring(0, idx));
           final after = l.substring(idx + 2);
-          if (before.isNotEmpty) out.write(before);
-          out.write('<mathblock>${buffer.toString()}</mathblock>');
-          if (after.isNotEmpty) out.write(after);
-          out.writeln();
+          if (before.isNotEmpty) {
+            out.write(before);
+          }
+          out
+            ..write('<mathblock>${buffer.toString()}</mathblock>')
+            ..writeln();
+          if (after.isNotEmpty) {
+            out.write(after);
+          }
           i = j; // advance outer loop
           found = true;
           break;
@@ -96,20 +115,22 @@ String processMath(String text) {
         }
       }
       if (!found) {
-        out.write('<mathblock>${buffer.toString()}</mathblock>');
-        out.writeln();
+        out
+          ..write('<mathblock>${buffer.toString()}</mathblock>')
+          ..writeln();
         i = j - 1;
       }
       continue;
     }
-    line = line.replaceAllMapped(RegExp(r'\$(.+?)\$'), (m) {
-      return '<mathinline>${m.group(1)}</mathinline>';
-    });
+    line = line.replaceAllMapped(
+      RegExp(r'\$(.+?)\$'),
+      (m) => '<mathinline>${m.group(1)}</mathinline>',
+    );
     out.writeln(line);
   }
   return out.toString();
 }
 
-String processMarkdownForPreview(String src) => preserveLineBreaks(processMath(src));
+String processMarkdownForPreview(String src) => preserveLineBreaks(src);
 
 const kPrefKeyMathEnabled = 'pref_math_enabled_v1';

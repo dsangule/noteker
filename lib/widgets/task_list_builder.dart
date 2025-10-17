@@ -7,7 +7,7 @@ class LiTaskListBuilder extends MarkdownElementBuilder {
   Widget visitElementAfter(md.Element element, TextStyle? preferredStyle) {
     // Only convert if the list item starts with [ ] or [x]
     final raw = element.textContent;
-    final match = RegExp(r'^\s*\[( |x|X)\]\s*(.*)$', dotAll: false).firstMatch(raw);
+    final match = RegExp(r'^\s*\[( |x|X)\]\s*(.*)$').firstMatch(raw);
     if (match == null) {
       return Text(raw, style: preferredStyle);
     }

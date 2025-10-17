@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:noteker/models/note.dart';
+import '../models/note.dart';
 
 abstract class NoteRepository {
   Future<List<Note>> loadNotes();
@@ -17,8 +17,10 @@ class SharedPrefsNoteRepository implements NoteRepository {
     try {
       final prefs = await SharedPreferences.getInstance();
       final jsonStr = prefs.getString(_kNotesKey);
-      if (jsonStr == null || jsonStr.isEmpty) return [];
-      final List<dynamic> decoded = json.decode(jsonStr);
+      if (jsonStr == null || jsonStr.isEmpty) {
+        return [];
+      }
+      final decoded = json.decode(jsonStr) as List<dynamic>;
       return decoded.map((e) {
         final map = e as Map<String, dynamic>;
         return Note(
@@ -28,7 +30,7 @@ class SharedPrefsNoteRepository implements NoteRepository {
           date: DateTime.parse(map['date'] as String),
         );
       }).toList();
-    } catch (_) {
+    } on Exception catch (_) {
       return [];
     }
   }

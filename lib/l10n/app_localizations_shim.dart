@@ -7,8 +7,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 class AppLocalizations {
-  final Locale locale;
   AppLocalizations(this.locale);
+
+  factory AppLocalizations.of(BuildContext context) => AppLocalizations(Localizations.localeOf(context));
+
+  final Locale locale;
 
   static const localizationsDelegates = <LocalizationsDelegate<dynamic>>[
     GlobalMaterialLocalizations.delegate,
@@ -21,15 +24,14 @@ class AppLocalizations {
     Locale('es'),
   ];
 
-  static AppLocalizations of(BuildContext context) => AppLocalizations(Localizations.localeOf(context));
-
   String get demoTitle => locale.languageCode.startsWith('es')
       ? 'Bienvenido a Noteker - Demo de matematicas'
       : 'Welcome to Noteker - Math demo';
 
   String get demoContent {
     if (locale.languageCode.startsWith('es')) {
-      return r'''Bienvenido a Noteker!
+      return r'''
+Bienvenido a Noteker!
 
 Esta demo muestra matematicas en linea: $x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
 
@@ -42,7 +44,8 @@ Los saltos de linea simples se conservan - pulsa Enter para crear una nueva line
 
 Disfruta!''';
     }
-    return r'''Welcome to Noteker!
+    return r'''
+Welcome to Noteker!
 
 This demo shows inline math: $x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
 
